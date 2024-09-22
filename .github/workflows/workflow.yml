@@ -21,9 +21,9 @@ jobs:
           git config --global user.email "soumyaranjansahuwork@gmail.com"
 
       # Step 3: Checkout Master Branch (create if it doesn't exist)
-      - name: Checkout Master Branch
+      - name: Checkout Main Branch
         run: |
-          git checkout master || git checkout -b master
+          git checkout main || git checkout -b main
 
       # Step 4: Ensure Commit Exists
       - name: Ensure Commit Exists
