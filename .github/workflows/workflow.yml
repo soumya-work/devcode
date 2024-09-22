@@ -3,7 +3,7 @@ name: Push Code to Another Repo
 on:
   push:
     branches:
-      - main # Trigger this on the 'master' branch push
+      - master # Trigger this on the 'master' branch push
 
 jobs:
   push_code:
@@ -22,12 +22,9 @@ jobs:
 
       # Step 3: Add target repository as remote
       - name: Add target repository as remote
-        run: git remote add origin https://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
-@github.com/soumya-work/devcode.git
+        run: git remote add origin https://${{ secrets.PAT }}@github.com/soumya-work/devcode.git
 
       # Step 4: Push to Target Repository
       - name: Push to Target Repository
         run: |
-          git push -u origin main --force
-        env:
-          PAT: ${{ secrets.PAT }} # Use PAT for pushing to the target repo
+          git push -u origin master --force
