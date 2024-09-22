@@ -3,7 +3,7 @@ name: Push Code to Another Repo
 on:
   push:
     branches:
-      - master # Trigger this on the 'master' branch push
+      - main # Trigger this on the 'main' branch push
 
 jobs:
   push_code:
@@ -20,7 +20,7 @@ jobs:
           git config --global user.name "soumya-work"
           git config --global user.email "soumyaranjansahuwork@gmail.com"
 
-      # Step 3: Checkout Master Branch (create if it doesn't exist)
+      # Step 3: Checkout Main Branch (create if it doesn't exist)
       - name: Checkout Main Branch
         run: |
           git checkout main || git checkout -b main
@@ -45,4 +45,4 @@ jobs:
       # Step 6: Push to Target Repository
       - name: Push to Target Repository
         run: |
-          git push -u origin master --force
+          git push -u origin main --force
