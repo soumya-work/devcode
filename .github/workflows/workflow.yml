@@ -3,7 +3,7 @@ name: Push Code to Another Repo
 on:
   push:
     branches:
-      - master # Trigger this on the 'master' branch push
+      - main # Trigger this on the 'master' branch push
 
 jobs:
   push_code:
