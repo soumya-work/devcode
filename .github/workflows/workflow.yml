@@ -1,48 +1,55 @@
-name: Push Code to Another Repo
+# Navigate to your devcode repository
+cd path/to/devcode
+
+# Create the directories if they don't exist
+mkdir -p .github/workflows
+
+# Create the workflow file
+echo "name: Push Code from Devcode to Prodweb
 
 on:
   push:
     branches:
-      - main # Trigger this on the 'main' branch push
+      - main
 
 jobs:
   push_code:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout Code from the current repository
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      # Step 2: Set up Git for pushing code
       - name: Set up Git
         run: |
-          git config --global user.name "soumya-work"
-          git config --global user.email "soumyaranjansahuwork@gmail.com"
+          git config --global user.name 'soumya-work'
+          git config --global user.email 'soumyaranjansahuwork@gmail.com'
 
-      # Step 3: Checkout Main Branch (create if it doesn't exist)
-      - name: Checkout Main Branch
+      - name: Ensure Main Branch Exists
         run: |
           git checkout main || git checkout -b main
 
-      # Step 4: Ensure Commit Exists
       - name: Ensure Commit Exists
         run: |
-          if [ -z "$(git log -1 --pretty=format:%H)" ]; then
-            echo "No commits found. Creating initial commit."
-            echo "Initial file" > README.md
+          if [ -z \"\$(git log -1 --pretty=format:%H)\" ]; then
+            echo 'No commits found. Creating initial commit.'
+            echo 'Initial file' > README.md
             git add README.md
-            git commit -m "Initial commit"
+            git commit -m 'Initial commit'
           else
-            echo "Commits found."
+            echo 'Commits found.'
           fi
 
-      # Step 5: Set target repository as remote
       - name: Set target repository as remote
         run: |
-          git remote set-url origin https://${{ secrets.PAT }}@github.com/soumya-work/devcode.git
+          git remote set-url prodweb https://\${{ secrets.PAT }}@github.com/soumya-work/prodweb.git
 
-      # Step 6: Push to Target Repository
-      - name: Push to Target Repository
+      - name: Push to Prodweb Repository
         run: |
-          git push -u origin main --force
+          git push -u prodweb main --force
+" > .github/workflows/workflow.yml
+
+# Add and commit the changes
+git add .github/workflows/workflow.yml
+git commit -m "Add GitHub Actions workflow to push code to Prodweb"
+git push origin main
