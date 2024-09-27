@@ -1,65 +1,45 @@
-name: Push Code from Devcode Main to Prodweb Beta
+name: Push Code from Dev to Prod Repo
 
 on:
   push:
-    branches:
-      - main # Trigger this on the 'main' branch push
+    branches: [ main ]  # Trigger the workflow on push to 'main' branch
+  pull_request:
+    branches: [ main ]  # Also trigger on pull requests to 'main' branch
 
 jobs:
-  push_code:
+  build:
     runs-on: ubuntu-latest
+    container: pandoc/latex  # Optional container if required for the build
 
     steps:
-      # Step 1: Checkout Code from the current repository
-      - name: Checkout Code
+      # Step 1: Checkout the code from the current repository
+      - name: Checkout Dev Repository
         uses: actions/checkout@v2
 
-      # Step 2: Set up Git for pushing code
-      - name: Set up Git
+      # Step 2: Install mustache (optional)
+      - name: Install mustache
         run: |
-          git config --global user.name "soumya-work"
-          git config --global user.email "soumyaranjansahuwork@gmail.com"
+          apk add ruby && gem install mustache
 
-      # Step 3: Ensure Main Branch Exists in Dev Repo
-      - name: Ensure Main Branch Exists
+      # Step 3: Run build script
+      - name: Run build.sh script
         run: |
-          git checkout main || git checkout -b main
+          sh ./build.sh
 
-      # Step 4: Ensure Commit Exists in Main Branch
-      - name: Ensure Commit Exists
-        run: |
-          if [ -z "$(git log -1 --pretty=format:%H)" ]; then
-            echo "No commits found. Creating initial commit."
-            echo "Initial file" > README.md
-            git add README.md
-            git commit -m "Initial commit"
-          else
-            echo "Commits found."
-          fi
+      # Step 4: Push to Prodweb repository
+      - name: Push code to Prodweb
+        id: push_directory
+        uses: cpina/github-action-push-to-another-repository@target-branch
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}  # Use GitHub secret for the token
+        with:
+          source-directory: .  # Root directory to push
+          destination-github-username: 'soumya-work'  # Your GitHub username
+          destination-repository-name: 'prodweb'  # Name of the production repository
+          user-email: 'soumyaranjansahuwork@gmail.com'  # Your email for commits
+          commit-message: "Pushing changes from $GITHUB_REF"
+          target-branch: beta  # Push to 'beta' branch in the prod repo
 
-      # Step 5: Add target repository (prodweb) as remote with PAT (for testing purposes only)
-      - name: Add target repository as remote
-        run: |
-          git remote add prodweb https://github-actions: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@github.com/soumya-work/prodweb.git
-
-      # Step 6: Check if 'beta' branch exists in Prodweb
-      - name: Check for 'beta' branch in Prodweb
-        id: check_branch
-        run: |
-          if git ls-remote --exit-code --heads prodweb beta; then
-            echo "Branch exists" && echo "exists=true" >> $GITHUB_ENV
-          else
-            echo "Branch does not exist" && echo "exists=false" >> $GITHUB_ENV
-          fi
-
-      # Step 7: Create 'beta' branch if Not Existing
-      - name: Create Beta Branch if Not Existing
-        if: env.exists == 'false'
-        run: |
-          git checkout -b beta
-          git push prodweb beta
-
-      # Step 8: Push changes from 'main' branch of Dev to 'beta' branch of Prod
-      - name: Push to Prodweb Beta Branch
-        run: |
-          git push prodweb main:beta --force
+      # Step 5: Test exported variable
+      - name: Echo the cloned directory path
+        run: echo "Cloned directory: $DESTINATION_CLONED_DIRECTORY"
