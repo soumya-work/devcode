@@ -1,45 +1,48 @@
-name: Push Code from Dev to Prod Repo
+name: Push Code from Devcode to Prodweb
 
 on:
   push:
-    branches: [ main ]  # Trigger the workflow on push to 'main' branch
-  pull_request:
-    branches: [ main ]  # Also trigger on pull requests to 'main' branch
+    branches:
+      - main  # Trigger this on the 'main' branch push
 
 jobs:
-  build:
+  push_code:
     runs-on: ubuntu-latest
-    container: pandoc/latex  # Optional container if required for the build
 
     steps:
-      # Step 1: Checkout the code from the current repository
-      - name: Checkout Dev Repository
+      # Step 1: Checkout Code from the current repository
+      - name: Checkout Code
         uses: actions/checkout@v2
 
-      # Step 2: Install mustache (optional)
-      - name: Install mustache
+      # Step 2: Set up Git for pushing code
+      - name: Set up Git
         run: |
-          apk add ruby && gem install mustache
+          git config --global user.name "soumya-work"
+          git config --global user.email "soumyaranjansahuwork@gmail.com"
 
-      # Step 3: Run build script
-      - name: Run build.sh script
+      # Step 3: Ensure Main Branch Exists
+      - name: Ensure Main Branch Exists
         run: |
-          sh ./build.sh
+          git checkout main || git checkout -b main
 
-      # Step 4: Push to Prodweb repository
-      - name: Push code to Prodweb
-        id: push_directory
-        uses: cpina/github-action-push-to-another-repository@target-branch
-        env:
-          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}  # Use GitHub secret for the token
-        with:
-          source-directory: .  # Root directory to push
-          destination-github-username: 'soumya-work'  # Your GitHub username
-          destination-repository-name: 'prodweb'  # Name of the production repository
-          user-email: 'soumyaranjansahuwork@gmail.com'  # Your email for commits
-          commit-message: "Pushing changes from $GITHUB_REF"
-          target-branch: beta  # Push to 'beta' branch in the prod repo
+      # Step 4: Ensure Commit Exists
+      - name: Ensure Commit Exists
+        run: |
+          if [ -z "$(git log -1 --pretty=format:%H)" ]; then
+            echo "No commits found. Creating initial commit."
+            echo "Initial file" > README.md
+            git add README.md
+            git commit -m "Initial commit"
+          else
+            echo "Commits found."
+          fi
 
-      # Step 5: Test exported variable
-      - name: Echo the cloned directory path
-        run: echo "Cloned directory: $DESTINATION_CLONED_DIRECTORY"
+      # Step 5: Add target repository as remote
+      - name: Add target repository as remote
+        run: |
+          git remote add prodweb https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git
+
+      # Step 6: Push to Prodweb Repository
+      - name: Push to Prodweb Repository
+        run: |
+          git push -u prodweb main --force
