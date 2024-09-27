@@ -1,4 +1,4 @@
-name: Push Code from Devcode to Prodweb
+name: Push Code from Devcode Main to Prodweb Beta
 
 on:
   push:
@@ -20,12 +20,12 @@ jobs:
           git config --global user.name "soumya-work"
           git config --global user.email "soumyaranjansahuwork@gmail.com"
 
-      # Step 3: Ensure Main Branch Exists
+      # Step 3: Ensure Main Branch Exists in Dev Repo
       - name: Ensure Main Branch Exists
         run: |
           git checkout main || git checkout -b main
 
-      # Step 4: Ensure Commit Exists
+      # Step 4: Ensure Commit Exists in Main Branch
       - name: Ensure Commit Exists
         run: |
           if [ -z "$(git log -1 --pretty=format:%H)" ]; then
@@ -37,12 +37,29 @@ jobs:
             echo "Commits found."
           fi
 
-      # Step 5: Add target repository as remote
+      # Step 5: Add target repository (prodweb) as remote
       - name: Add target repository as remote
         run: |
           git remote add prodweb https://${{ secrets.PAT }}@github.com/soumya-work/prodweb.git
 
-      # Step 6: Push to Prodweb Repository
-      - name: Push to Prodweb Repository
+      # Step 6: Check if 'beta' branch exists in Prodweb
+      - name: Check for 'beta' branch in Prodweb
+        id: check_branch
         run: |
-          git push -u prodweb main --force
+          if git ls-remote --exit-code --heads prodweb beta; then
+            echo "Branch exists" && echo "exists=true" >> $GITHUB_ENV
+          else
+            echo "Branch does not exist" && echo "exists=false" >> $GITHUB_ENV
+          fi
+
+      # Step 7: Create 'beta' branch if it doesn't exist, else skip
+      - name: Create Beta Branch if Not Existing
+        if: env.exists == 'false'
+        run: |
+          git checkout -b beta
+          git push prodweb beta
+
+      # Step 8: Push changes from 'main' branch of Dev to 'beta' branch of Prod
+      - name: Push to Prodweb Beta Branch
+        run: |
+          git push prodweb main:beta --force
