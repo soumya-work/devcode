@@ -40,7 +40,7 @@ jobs:
       # Step 5: Add target repository (prodweb) as remote
       - name: Add target repository as remote
         run: |
-          git remote add prodweb https://${{ secrets.PAT }}@github.com/soumya-work/prodweb.git
+          git remote add prodweb https://github-actions:${{ secrets.PAT }}@github.com/soumya-work/prodweb.git
 
       # Step 6: Check if 'beta' branch exists in Prodweb
       - name: Check for 'beta' branch in Prodweb
@@ -52,7 +52,7 @@ jobs:
             echo "Branch does not exist" && echo "exists=false" >> $GITHUB_ENV
           fi
 
-      # Step 7: Create 'beta' branch if it doesn't exist, else skip
+      # Step 7: Create 'beta' branch if Not Existing
       - name: Create Beta Branch if Not Existing
         if: env.exists == 'false'
         run: |
