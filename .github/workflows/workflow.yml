@@ -37,10 +37,10 @@ jobs:
             echo "Commits found."
           fi
 
-      # Step 5: Add target repository (prodweb) as remote
+      # Step 5: Add target repository (prodweb) as remote with PAT (for testing purposes only)
       - name: Add target repository as remote
         run: |
-          git remote add prodweb https://github-actions:${{ secrets.PAT }}@github.com/soumya-work/prodweb.git
+          git remote add prodweb https://github-actions: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@github.com/soumya-work/prodweb.git
 
       # Step 6: Check if 'beta' branch exists in Prodweb
       - name: Check for 'beta' branch in Prodweb
