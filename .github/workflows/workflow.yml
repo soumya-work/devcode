@@ -47,7 +47,6 @@
 #         run: |
 #           git push -u prodweb main --force
 
-
 name: Push Code from Devcode to Prodweb
 
 on:
@@ -70,13 +69,20 @@ jobs:
           git config --global user.name "soumya-work"
           git config --global user.email "soumyaranjansahuwork@gmail.com"
 
-      # Step 3: Add target repository as remote
+      # Step 3: Add target repository as remote using SSH
       - name: Add target repository as remote
         run: |
-          git remote add prodweb https://${{secrets.API_TOKEN_GITHUB}}@github.com/soumya-work/prodweb.git
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          git remote add prodweb git@github.com:soumya-work/prodweb.git
 
-      # Step 4: Push to Prodweb Repository
+      # Step 4: Push to Prodweb Repository with retries
       - name: Push to Prodweb Repository
         run: |
-         git push prodweb main --force
-
+          for i in {1..3}; do
+            if git push prodweb main --force; then
+              break
+            else
+              echo "Push failed, retrying in 30 seconds..."
+              sleep 30
+            fi
+          done
