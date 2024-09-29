@@ -1,4 +1,55 @@
-name: Push Code from Devcode to Prodweb
+# name: Push Code from Devcode to Prodweb
+
+# on:
+#   push:
+#     branches:
+#       - main  # Trigger this on the 'main' branch push
+
+# jobs:
+#   push_code:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       # Step 1: Checkout Code from the current repository
+#       - name: Checkout Code
+#         uses: actions/checkout@v2
+
+#       # Step 2: Set up Git for pushing code
+#       - name: Set up Git
+#         run: |
+#           git config --global user.name "soumya-work"
+#           git config --global user.email "soumyaranjansahuwork@gmail.com"
+
+#       # Step 3: Ensure Main Branch Exists
+#       - name: Ensure Main Branch Exists
+#         run: |
+#           git checkout main || git checkout -b main
+
+#       # Step 4: Ensure Commit Exists
+#       - name: Ensure Commit Exists
+#         run: |
+#           if [ -z "$(git log -1 --pretty=format:%H)" ]; then
+#             echo "No commits found. Creating initial commit."
+#             echo "Initial file" > README.md
+#             git add README.md
+#             git commit -m "Initial commit"
+#           else
+#             echo "Commits found."
+#           fi
+
+#       # Step 5: Add target repository as remote
+#       - name: Add target repository as remote
+#         run: |
+#           git remote add prodweb https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git
+
+#       # Step 6: Push to Prodweb Repository
+#       - name: Push to Prodweb Repository
+#         run: |
+#           git push -u prodweb main --force
+
+
+
+name: Push Code from Devcode to Other Repository
 
 on:
   push:
@@ -20,29 +71,25 @@ jobs:
           git config --global user.name "soumya-work"
           git config --global user.email "soumyaranjansahuwork@gmail.com"
 
-      # Step 3: Ensure Main Branch Exists
-      - name: Ensure Main Branch Exists
-        run: |
-          git checkout main || git checkout -b main
-
-      # Step 4: Ensure Commit Exists
-      - name: Ensure Commit Exists
-        run: |
-          if [ -z "$(git log -1 --pretty=format:%H)" ]; then
-            echo "No commits found. Creating initial commit."
-            echo "Initial file" > README.md
-            git add README.md
-            git commit -m "Initial commit"
-          else
-            echo "Commits found."
-          fi
-
-      # Step 5: Add target repository as remote
+      # Step 3: Add target repository as remote
       - name: Add target repository as remote
         run: |
-          git remote add prodweb https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git
+          git remote add target https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git  
 
-      # Step 6: Push to Prodweb Repository
-      - name: Push to Prodweb Repository
+      # Step 4: Fetch the target branch and merge or overwrite
+      - name: Fetch and switch to target branch
         run: |
-          git push -u prodweb main --force
+          git fetch target
+          git checkout -B target-branch target/target-branch || git checkout -b target-branch 
+      # Step 5: Copy code from current repository to target branch
+      - name: Copy code to target branch
+        run: |
+          git checkout main
+          git pull origin main
+          git checkout target-branch
+          git reset --hard main 
+
+      # Step 6: Push the changes to the target repository
+      - name: Push to target repository
+        run: |
+          git push target target-branch --force
