@@ -59,6 +59,8 @@ on:
 jobs:
   push_code:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       # Step 1: Checkout Code from the current repository
