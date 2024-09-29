@@ -78,5 +78,5 @@ jobs:
       # Step 4: Push to Prodweb Repository
       - name: Push to Prodweb Repository
         run: |
-          git push -u prodweb main --force
+         git push prod main --force
 
