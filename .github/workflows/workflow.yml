@@ -69,11 +69,10 @@ jobs:
           git config --global user.name "soumya-work"
           git config --global user.email "soumyaranjansahuwork@gmail.com"
 
-      # Step 3: Add target repository as remote using SSH
+      # Step 3: Add target repository as remote using PAT
       - name: Add target repository as remote
         run: |
-          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-          git remote add prodweb git@github.com:soumya-work/prodweb.git
+          git remote add prodweb https://${{ secrets.API_GITHUB_TOKEN }}@github.com/soumya-work/prodweb.git
 
       # Step 4: Push to Prodweb Repository with retries
       - name: Push to Prodweb Repository
