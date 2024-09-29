@@ -73,7 +73,7 @@ jobs:
       # Step 3: Add target repository as remote
       - name: Add target repository as remote
         run: |
-          git remote add prodweb https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git
+          git remote add prodweb https://${{secrets.API_TOKEN_GITHUB}}@github.com/soumya-work/prodweb.git
 
       # Step 4: Push to Prodweb Repository
       - name: Push to Prodweb Repository
