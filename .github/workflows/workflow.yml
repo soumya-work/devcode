@@ -48,8 +48,7 @@
 #           git push -u prodweb main --force
 
 
-
-name: Push Code from Devcode to Other Repository
+name: Push Code from Devcode to Prodweb
 
 on:
   push:
@@ -59,8 +58,6 @@ on:
 jobs:
   push_code:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       # Step 1: Checkout Code from the current repository
@@ -76,22 +73,10 @@ jobs:
       # Step 3: Add target repository as remote
       - name: Add target repository as remote
         run: |
-          git remote add target https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git  
+          git remote add prodweb https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git
 
-      # Step 4: Fetch the target branch and merge or overwrite
-      - name: Fetch and switch to target branch
+      # Step 4: Push to Prodweb Repository
+      - name: Push to Prodweb Repository
         run: |
-          git fetch target
-          git checkout -B target-branch target/target-branch || git checkout -b target-branch 
-      # Step 5: Copy code from current repository to target branch
-      - name: Copy code to target branch
-        run: |
-          git checkout main
-          git pull origin main
-          git checkout target-branch
-          git reset --hard main 
+          git push -u prodweb main --force
 
-      # Step 6: Push the changes to the target repository
-      - name: Push to target repository
-        run: |
-          git push target target-branch --force
