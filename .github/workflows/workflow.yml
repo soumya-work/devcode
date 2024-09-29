@@ -1,87 +1,31 @@
-name: Push Code from Devcode to Prodweb
+name: Push Code from Dev to Prod
 
 on:
   push:
     branches:
-      - main  # Trigger this on the 'main' branch push
+      - main  # Trigger on the 'main' branch push in the dev repo
 
 jobs:
-  push_code:
+  push_code_to_prod:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout Code from the current repository
-      - name: Checkout Code
+      # Step 1: Checkout the code from the current dev repository
+      - name: Checkout Dev Repository
         uses: actions/checkout@v2
 
-      # Step 2: Set up Git for pushing code
-      - name: Set up Git
+      # Step 2: Set up Git user credentials
+      - name: Set up Git user
         run: |
           git config --global user.name "soumya-work"
           git config --global user.email "soumyaranjansahuwork@gmail.com"
 
-      # Step 3: Ensure Main Branch Exists
-      - name: Ensure Main Branch Exists
+      # Step 3: Add Prod repository as a remote
+      - name: Add Prod Repository as Remote
         run: |
-          git checkout main || git checkout -b main
+          git remote add prod https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git
 
-      # Step 4: Ensure Commit Exists
-      - name: Ensure Commit Exists
+      # Step 4: Push to Prod repository main branch
+      - name: Push Changes
         run: |
-          if [ -z "$(git log -1 --pretty=format:%H)" ]; then
-            echo "No commits found. Creating initial commit."
-            echo "Initial file" > README.md
-            git add README.md
-            git commit -m "Initial commit"
-          else
-            echo "Commits found."
-          fi
-
-      # Step 5: Add target repository as remote
-      - name: Add target repository as remote
-        run: |
-          git remote add prodweb https://${{ secrets.API_TOKEN_GITHUB }}@github.com/soumya-work/prodweb.git
-
-      # Step 6: Push to Prodweb Repository
-      - name: Push to Prodweb Repository
-        run: |
-          git push -u prodweb main --force
-
-# # name: Push Code from Devcode to Prodweb
-
-# # on:
-# #   push:
-# #     branches:
-# #       - main  # Trigger this on the 'main' branch push
-
-# # jobs:
-# #   push_code:
-# #     runs-on: ubuntu-latest
-
-# #     steps:
-# #       # Step 1: Checkout Code from the current repository
-# #       - name: Checkout Code
-# #         uses: actions/checkout@v2
-
-# #       # Step 2: Set up Git for pushing code
-# #       - name: Set up Git
-# #         run: |
-# #           git config --global user.name "soumya-work"
-# #           git config --global user.email "soumyaranjansahuwork@gmail.com"
-
-# #       # Step 3: Add target repository as remote using PAT
-# #       - name: Add target repository as remote
-# #         run: |
-# #           git remote add prodweb https://${{ secrets.API_GITHUB_TOKEN }}@github.com/soumya-work/prodweb.git
-
-# #       # Step 4: Push to Prodweb Repository with retries
-# #       - name: Push to Prodweb Repository
-# #         run: |
-# #           for i in {1..3}; do
-# #             if git push prodweb main --force; then
-# #               break
-#             else
-#               echo "Push failed, retrying in 30 seconds..."
-#               sleep 30
-#             fi
-#           done
+          git push prod main --force
